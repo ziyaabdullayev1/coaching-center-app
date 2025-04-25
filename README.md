@@ -4,7 +4,7 @@ This full-stack project is designed to support the academic success of middle sc
 
 ## 🚀 Tech Stack
 
-- **Frontend:** React + Vite + Tailwind CSS  
+- **Frontend:** React + Vite 
 - **Backend:** Node.js + Express  
 - **Database & Auth:** Supabase  
 - **API Testing:** Postman  

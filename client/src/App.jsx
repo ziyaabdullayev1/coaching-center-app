@@ -10,7 +10,8 @@ import TeacherDashboard from "./pages/TeacherDashboard";
 import CoachDashboard from "./pages/CoachDashboard";
 import ProtectedRoute from "./components/ProtectedRoute";
 import StudentList from "./pages/StudentList";
-
+import GoalList from "./pages/GoalList";
+import TaskPage from "./pages/TaskPage";
 
 
 function App() {
@@ -52,7 +53,32 @@ function App() {
           </PrivateRoute>
         }
       />
+      <Route
+  path="/dashboard/coach/students"
+  element={
+    <ProtectedRoute allowedRoles={["coach"]}>
+      <StudentList />
+    </ProtectedRoute>
+  }
+/>
+<Route
+  path="/dashboard/teacher/goals"
+  element={
+    <ProtectedRoute allowedRoles={["teacher", "coach"]}>
+      <GoalList />
+    </ProtectedRoute>
+  }
+/>
+<Route
+  path="/dashboard/teacher/tasks"
+  element={
+    <ProtectedRoute allowedRoles={["teacher", "coach"]}>
+      <TaskPage />
+    </ProtectedRoute>
+  }
+/>
     </Routes>
+    
   );
 }
 

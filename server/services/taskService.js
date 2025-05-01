@@ -25,3 +25,13 @@ exports.deleteTask = async (id) => {
 exports.getTasksByGoalId = async (goalId) => {
   return await supabase.from("tasks").select("*").eq("goal_id", goalId);
 };
+
+// Belirli bir öğrenciye ait görevleri getir
+exports.getTasksByStudent = async (student_id) => {
+  return await supabase.from("tasks").select("*").eq("student_id", student_id);
+};
+
+// Görevin completed durumunu güncelle
+exports.updateTaskCompleted = async (id, completed) => {
+  return await supabase.from("tasks").update({ completed }).eq("id", id);
+};  

@@ -40,3 +40,20 @@ exports.getTasksByGoal = async (req, res) => {
   if (error) return res.status(500).json({ error: error.message });
   res.json(data);
 };
+
+// Öğrencinin görevlerini çek
+exports.getTasksByStudent = async (req, res) => {
+  const { student_id } = req.params;
+  const { data, error } = await taskService.getTasksByStudent(student_id);
+  if (error) return res.status(500).json({ error: error.message });
+  res.json(data);
+};
+
+// Görevin tamamlanma durumunu güncelle
+exports.toggleTaskCompleted = async (req, res) => {
+  const { id } = req.params;
+  const { completed } = req.body;
+  const { data, error } = await taskService.updateTaskCompleted(id, completed);
+  if (error) return res.status(500).json({ error: error.message });
+  res.json(data);
+};

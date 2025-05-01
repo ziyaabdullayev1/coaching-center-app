@@ -12,6 +12,7 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import StudentList from "./pages/StudentList";
 import GoalList from "./pages/GoalList";
 import TaskPage from "./pages/TaskPage";
+import StudentTasksPage from "./pages/StudentTasksPage";
 
 
 function App() {
@@ -77,6 +78,7 @@ function App() {
     </ProtectedRoute>
   }
 />
+<Route path="/dashboard/student/tasks" element={<StudentTasksPage />} />
     </Routes>
     
   );

@@ -1,22 +1,69 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "../contexts/AuthContext";
-import { fetchTasksByStudentId, updateTaskStatus } from "../services/requests";
+import {
+  fetchTasksByStudentId,
+  updateTaskStatus,
+} from "../services/requests";
 
 export default function StudentTasksPage() {
-  const { user } = useAuth(); // Supabase kullanıcısı
+  const { user } = useAuth();
   const [tasks, setTasks] = useState([]);
+  const [studentId, setStudentId] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   useEffect(() => {
     const loadTasks = async () => {
-      if (!user) return;
+      setLoading(true);
+      setError("");
 
-      const studentId = user.user_metadata?.student_id || user.id;
-      const data = await fetchTasksByStudentId(studentId);
+      try {
+        if (!user?.email) {
+          setError("Kullanıcı oturumu bulunamadı.");
+          return;
+        }
 
-      if (Array.isArray(data)) {
-        setTasks(data);
-      } else {
-        console.error("Görevler alınamadı:", data);
+        // 🔍 Öğrenciyi email ile çek
+        const res = await fetch(`/api/students/email/${user.email}`);
+        if (!res.ok) {
+          const text = await res.text();
+          console.error("🚫 API yanıtı:", text.slice(0, 200));
+          setError(`Öğrenci bulunamadı (${res.status})`);
+          return;
+        }
+
+        let student = null;
+
+        try {
+          student = await res.clone().json(); // clone sayesinde hata alınmaz
+        } catch (jsonErr) {
+          const text = await res.text();
+          console.error("❌ JSON Parse Hatası:", jsonErr.message);
+          console.error("🧾 Gelen veri:", text.slice(0, 200));
+          setError("Veri işlenemedi. JSON formatı hatalı.");
+          return;
+        }
+
+        if (!student?.id) {
+          setError("Öğrenci ID'si bulunamadı.");
+          return;
+        }
+
+        setStudentId(student.id);
+
+        // ✅ Görevleri getir
+        const taskData = await fetchTasksByStudentId(student.id);
+        if (Array.isArray(taskData)) {
+          setTasks(taskData);
+        } else {
+          console.error("❌ Görev listesi alınamadı:", taskData);
+          setError("Görev listesi alınamadı.");
+        }
+      } catch (err) {
+        console.error("❌ Beklenmeyen hata:", err.message);
+        setError("Sunucuya bağlanırken hata oluştu.");
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -36,10 +83,14 @@ export default function StudentTasksPage() {
 
   return (
     <div style={{ maxWidth: "700px", margin: "0 auto", padding: "2rem" }}>
-      <h2>📘 Your Tasks</h2>
+      <h2 style={{ fontSize: "1.8rem", marginBottom: "1rem" }}>📘 Görevlerim</h2>
 
-      {tasks.length === 0 ? (
-        <p>No tasks assigned yet.</p>
+      {loading ? (
+        <p>⏳ Yükleniyor...</p>
+      ) : error ? (
+        <p style={{ color: "red" }}>❌ {error}</p>
+      ) : tasks.length === 0 ? (
+        <p>Henüz görev atanmadı.</p>
       ) : (
         tasks.map((task) => (
           <div
@@ -52,12 +103,12 @@ export default function StudentTasksPage() {
               boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
             }}
           >
-            <strong>Day {task.day}</strong>
+            <strong>Gün {task.day}</strong>
             <p>
-              <b>Topic:</b> {task.topic}
+              <b>Konu:</b> {task.topic}
             </p>
             <p>
-              <b>Questions:</b> {task.question_count}
+              <b>Soru Sayısı:</b> {task.question_count}
             </p>
             <label style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
               <input
@@ -65,7 +116,7 @@ export default function StudentTasksPage() {
                 checked={task.completed}
                 onChange={() => handleToggle(task.id, task.completed)}
               />
-              {task.completed ? "Completed" : "Incomplete"}
+              {task.completed ? "✔️ Tamamlandı" : "⬜ Henüz tamamlanmadı"}
             </label>
           </div>
         ))

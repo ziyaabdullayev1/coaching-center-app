@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { Routes, Route } from "react-router-dom";
 import StudentsPage from "./pages/StudentsPage";
 import LoginPage from "./pages/LoginPage";
 import SignupPage from "./pages/SignupPage";
@@ -10,42 +10,45 @@ import TeacherDashboard from "./pages/TeacherDashboard";
 import CoachDashboard from "./pages/CoachDashboard";
 import ProtectedRoute from "./components/ProtectedRoute";
 import StudentList from "./pages/StudentList";
-import GoalList from "./pages/GoalList";
 import TaskPage from "./pages/TaskPage";
 import StudentTasksPage from "./pages/StudentTasksPage";
-
+import HomePage from "./pages/HomePage"; // ✅ Anasayfa
 
 function App() {
   return (
     <Routes>
+      {/* ✅ Ana Sayfa */}
+      <Route path="/" element={<HomePage />} />
+
       <Route path="/login" element={<LoginPage />} />
       <Route path="/signup" element={<SignupPage />} />
       <Route path="/role" element={<RoleSelection />} />
       <Route path="/students" element={<StudentList />} />
+
       <Route
-  path="/dashboard/student"
-  element={
-    <ProtectedRoute allowedRoles={["student"]}>
-      <StudentDashboard />
-    </ProtectedRoute>
-  }
-/>
-<Route
-  path="/dashboard/teacher"
-  element={
-    <ProtectedRoute allowedRoles={["teacher"]}>
-      <TeacherDashboard />
-    </ProtectedRoute>
-  }
-/>
-<Route
-  path="/dashboard/coach"
-  element={
-    <ProtectedRoute allowedRoles={["coach"]}>
-      <CoachDashboard />
-    </ProtectedRoute>
-  }
-/>
+        path="/dashboard/student"
+        element={
+          <ProtectedRoute allowedRoles={["student"]}>
+            <StudentDashboard />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/dashboard/teacher"
+        element={
+          <ProtectedRoute allowedRoles={["teacher"]}>
+            <TeacherDashboard />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/dashboard/coach"
+        element={
+          <ProtectedRoute allowedRoles={["coach"]}>
+            <CoachDashboard />
+          </ProtectedRoute>
+        }
+      />
       <Route
         path="/dashboard"
         element={
@@ -55,34 +58,24 @@ function App() {
         }
       />
       <Route
-  path="/dashboard/coach/students"
-  element={
-    <ProtectedRoute allowedRoles={["coach"]}>
-      <StudentList />
-    </ProtectedRoute>
-  }
-/>
-<Route
-  path="/dashboard/teacher/goals"
-  element={
-    <ProtectedRoute allowedRoles={["teacher", "coach"]}>
-      <GoalList />
-    </ProtectedRoute>
-  }
-/>
-<Route
-  path="/dashboard/teacher/tasks"
-  element={
-    <ProtectedRoute allowedRoles={["teacher", "coach"]}>
-      <TaskPage />
-    </ProtectedRoute>
-  }
-/>
-<Route path="/dashboard/student/tasks" element={<StudentTasksPage />} />
+        path="/dashboard/coach/students"
+        element={
+          <ProtectedRoute allowedRoles={["coach"]}>
+            <StudentList />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/dashboard/teacher/tasks"
+        element={
+          <ProtectedRoute allowedRoles={["teacher", "coach"]}>
+            <TaskPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route path="/dashboard/student/tasks" element={<StudentTasksPage />} />
     </Routes>
-    
   );
 }
-
 
 export default App;

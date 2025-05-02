@@ -8,7 +8,10 @@ exports.getAllTasks = async () => {
 
 // Yeni görev ekle
 exports.createTask = async (task) => {
-  return await supabase.from("tasks").insert([task]);
+  return await supabase
+    .from("tasks")
+    .insert([task])
+    .select(); // 🔥 Burası kritik!
 };
 
 // Görev güncelle

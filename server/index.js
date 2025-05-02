@@ -10,6 +10,7 @@ app.use(express.json());
 const studentRoutes = require("./routes/students");
 app.use("/api/students", studentRoutes);
 
+
 const goalRoutes = require("./routes/goals");
 app.use("/api/goals", goalRoutes);
 
@@ -18,6 +19,10 @@ app.use("/api/tasks", taskRoutes);
 
 const examRoutes = require("./routes/exams");
 app.use("/api/exams", examRoutes);
+
+const teacherRoutes = require("./routes/teachers");
+app.use("/api/teachers", teacherRoutes);
+
 
 
 const PORT = process.env.PORT || 3001;

@@ -8,7 +8,8 @@ router.put("/:id", tasksController.updateTask);
 router.delete("/:id", tasksController.deleteTask);
 router.get("/goal/:goal_id", tasksController.getTasksByGoal);
 // Öğrencinin kendi görevlerini çekmek
-router.get("/student/:student_id", tasksController.getTasksByStudent);
+router.get("/student/:student_id", tasksController.getTasksByStudentId);
+
 
 // Görev tamamlama toggle
 router.patch("/:id", tasksController.toggleTaskCompleted);

@@ -1,3 +1,5 @@
+const supabase = require("../services/supabaseClient"); 
+
 // controllers/studentsController.js
 const studentService = require("../services/studentService");
 
@@ -34,3 +36,27 @@ exports.deleteStudent = async (req, res) => {
   if (error) return res.status(400).json({ error: error.message });
   res.json({ message: "Student deleted successfully", data });
 };
+
+// GET /api/students/email/:email
+exports.getStudentByEmail = async (req, res) => {
+  const { email } = req.params;
+
+  const { data, error } = await supabase
+    .from("students")
+    .select("*")
+    .eq("email", email)
+    .maybeSingle(); // 🔄 değiştirildi
+
+  if (error) {
+    console.error("❌ Supabase error:", error.message);
+    return res.status(500).json({ error: error.message });
+  }
+
+  if (!data) {
+    console.warn(`🔍 Öğrenci bulunamadı: ${email}`);
+    return res.status(404).json({ error: "Student not found" });
+  }
+
+  res.json(data);
+};
+

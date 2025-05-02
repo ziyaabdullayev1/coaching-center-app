@@ -9,7 +9,7 @@ export default function AddGoal({ onGoalAdded }) {
   const [studentId, setStudentId] = useState("");
   const [students, setStudents] = useState([]);
 
-  console.log("AddGoal component çalıştı!")
+  // console.log("AddGoal component çalıştı!")
   
   useEffect(() => {
     const loadStudents = async () => {
@@ -22,28 +22,41 @@ export default function AddGoal({ onGoalAdded }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+  
     if (!studentId) {
       alert("Please select a student.");
       return;
     }
-
+  
     const newGoal = {
       lesson,
-      target: Number(target),
+      total_questions: Number(target), // 🔄 burada değişiklik yaptık
       start_date: startDate,
       end_date: endDate,
       student_id: studentId,
     };
-
+    
+  
+    // 🔍 LOG EKLENDİ: Payload kontrolü
+    console.log("📤 createGoal payload:", newGoal);
+  
+    // 🔍 LOG EKLENDİ: Tip kontrolü
+    console.log("🧪 Kontrol: target =", Number(target), "| isNaN:", isNaN(Number(target)));
+  
     const created = await createGoal(newGoal);
+  
+    // 🔍 LOG EKLENDİ: Response
+    console.log("✅ Backend yanıtı:", created);
+  
     if (created) {
-      onGoalAdded?.(); // yenileme tetikleyici
+      onGoalAdded?.();
       setLesson("");
       setTarget("");
       setStartDate("");
       setEndDate("");
       setStudentId("");
+    } else {
+      alert("Goal eklenemedi. Lütfen loglara bak.");
     }
   };
 
@@ -66,12 +79,13 @@ export default function AddGoal({ onGoalAdded }) {
         required
       />
       <input
-        type="number"
-        placeholder="Target (e.g., 70 questions)"
-        value={target}
-        onChange={(e) => setTarget(e.target.value)}
-        required
-      />
+  type="number"
+  placeholder="Total Questions (e.g., 70)"
+  value={target}
+  onChange={(e) => setTarget(e.target.value)}
+  required
+/>
+
       <input
         type="date"
         value={startDate}

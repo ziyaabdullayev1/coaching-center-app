@@ -1,12 +1,14 @@
 import { useState } from "react";
 import AddTask from "../components/AddTask";
+import AddGoal from "../components/AddGoal";
 import TaskList from "../components/TaskList";
-import AddGoal from "../components/AddGoal"; // ✅ import eklendi
 
 export default function TaskPage() {
   const [refreshKey, setRefreshKey] = useState(0);
-  const handleTaskAdded = () => setRefreshKey((oldKey) => oldKey + 1);
-  const handleGoalAdded = () => setRefreshKey((oldKey) => oldKey + 1); // Goal eklendiğinde de yenile
+
+  const handleDataRefresh = () => {
+    setRefreshKey((old) => old + 1);
+  };
 
   return (
     <div
@@ -18,10 +20,10 @@ export default function TaskPage() {
       }}
     >
       <h2 style={{ fontSize: "1.8rem", color: "#2563eb", marginBottom: "1.5rem" }}>
-        📝 Tasks
+        📝 Task Management
       </h2>
 
-      {/* ✅ Goal ekleme bölümü */}
+      {/* 🎯 GOAL EKLEME */}
       <div
         style={{
           backgroundColor: "white",
@@ -32,10 +34,10 @@ export default function TaskPage() {
         }}
       >
         <h3 style={{ fontSize: "1.2rem", marginBottom: "1rem" }}>🎯 Add New Goal</h3>
-        <AddGoal onGoalAdded={handleGoalAdded} />
+        <AddGoal onGoalAdded={handleDataRefresh} />
       </div>
 
-      {/* ✅ Task ekleme bölümü */}
+      {/* ➕ TASK EKLEME */}
       <div
         style={{
           backgroundColor: "white",
@@ -46,10 +48,10 @@ export default function TaskPage() {
         }}
       >
         <h3 style={{ fontSize: "1.2rem", marginBottom: "1rem" }}>➕ Add New Task</h3>
-        <AddTask onTaskAdded={handleTaskAdded} />
+        <AddTask onTaskAdded={handleDataRefresh} />
       </div>
 
-      {/* ✅ Task listesi */}
+      {/* 📋 TASK LİSTESİ */}
       <div
         style={{
           backgroundColor: "white",

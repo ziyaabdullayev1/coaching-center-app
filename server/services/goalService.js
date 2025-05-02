@@ -8,7 +8,10 @@ exports.getAllGoals = async () => {
 
 // Yeni hedef oluştur
 exports.createGoal = async (goal) => {
-  return await supabase.from("goals").insert([goal]);
+  return await supabase
+    .from("goals")
+    .insert([goal])
+    .select(); // 🔥 Yeni eklenen satır
 };
 
 // Güncelle

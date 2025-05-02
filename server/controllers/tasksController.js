@@ -1,4 +1,4 @@
-// controllers/tasksController.js
+const supabase = require("../services/supabaseClient");
 const taskService = require("../services/taskService");
 
 // GET /api/tasks
@@ -42,12 +42,42 @@ exports.getTasksByGoal = async (req, res) => {
 };
 
 // Öğrencinin görevlerini çek
-exports.getTasksByStudent = async (req, res) => {
-  const { student_id } = req.params;
-  const { data, error } = await taskService.getTasksByStudent(student_id);
-  if (error) return res.status(500).json({ error: error.message });
-  res.json(data);
+// Öğrenciye ait görevleri, goal üzerinden al
+// GET /api/tasks/student/:student_id
+exports.getTasksByStudentId = async (req, res) => { 
+  const studentId = req.params.student_id;
+
+  // 1️⃣ Öğrenciye ait goal'ları al
+  const { data: goals, error: goalError } = await supabase
+    .from("goals")
+    .select("id")
+    .eq("student_id", studentId);
+
+  if (goalError) {
+    return res.status(500).json({ error: goalError.message });
+  }
+
+  const goalIds = goals.map(goal => goal.id);
+
+  if (goalIds.length === 0) {
+    return res.json([]); // Bu öğrenciye ait hiç goal yoksa
+  }
+
+  // 2️⃣ Bu goal_id'lere ait tüm görevleri getir
+  const { data: tasks, error: taskError } = await supabase
+    .from("tasks")
+    .select("*")
+    .in("goal_id", goalIds);
+
+  if (taskError) {
+    return res.status(500).json({ error: taskError.message });
+  }
+
+  res.json(tasks);
 };
+
+
+
 
 // Görevin tamamlanma durumunu güncelle
 exports.toggleTaskCompleted = async (req, res) => {

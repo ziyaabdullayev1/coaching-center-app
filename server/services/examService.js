@@ -5,9 +5,12 @@ exports.getAllExams = async () => {
   return await supabase.from("exams").select("*");
 };
 
-// Yeni sınav ekle
-exports.createExam = async (exam) => {
-  return await supabase.from("exams").insert([exam]);
+// Yeni sınav(lar) ekle — artık bir dizi bekliyor
+// frontend’den [{…},{…},…] şeklinde gönderilen tüm satırları insert eder
+exports.createExam = async (exams) => {
+  // exams bir dizi mi, değilse tek bir obje ise onu da diziye sar
+  const payload = Array.isArray(exams) ? exams : [exams];
+  return await supabase.from("exams").insert(payload);
 };
 
 // Güncelle
@@ -25,62 +28,98 @@ exports.getExamsByStudentId = async (studentId) => {
   return await supabase.from("exams").select("*").eq("student_id", studentId);
 };
 
-// Net hesapla: doğru - (yanlış / 3)
+// Özet (net, toplam doğru/yanlış/boş)
 exports.getExamSummaryByStudent = async (studentId) => {
-    const { data, error } = await supabase.from("exams").select("*").eq("student_id", studentId);
-    if (error) return { error };
-  
-    let totalCorrect = 0, totalWrong = 0, totalBlank = 0;
-  
-    data.forEach((exam) => {
-      totalCorrect += exam.correct;
-      totalWrong += exam.wrong;
-      totalBlank += exam.blank;
-    });
-  
-    const net = totalCorrect - totalWrong / 3;
-  
-    return {
-      summary: {
-        correct: totalCorrect,
-        wrong: totalWrong,
-        blank: totalBlank,
-        net: Number(net.toFixed(2))
-      }
-    };
+  const { data, error } = await supabase
+    .from("exams")
+    .select("correct, wrong, blank")
+    .eq("student_id", studentId);
+  if (error) return { error };
+
+  let totalCorrect = 0, totalWrong = 0, totalBlank = 0;
+  data.forEach((row) => {
+    totalCorrect += row.correct;
+    totalWrong += row.wrong;
+    totalBlank += row.blank;
+  });
+
+  const net = totalCorrect - totalWrong / 3;
+  return {
+    summary: {
+      correct: totalCorrect,
+      wrong: totalWrong,
+      blank: totalBlank,
+      net: Number(net.toFixed(2)),
+    },
+    error: null,
   };
-  
-  // Ders bazlı ortalama doğru
-  exports.getAverageByLesson = async (studentId) => {
-    const { data, error } = await supabase.from("exams").select("*").eq("student_id", studentId);
-    if (error) return { error };
-  
-    const lessonStats = {};
-    data.forEach((exam) => {
-      if (!lessonStats[exam.lesson]) {
-        lessonStats[exam.lesson] = { totalCorrect: 0, count: 0 };
-      }
-      lessonStats[exam.lesson].totalCorrect += exam.correct;
-      lessonStats[exam.lesson].count += 1;
-    });
-  
-    const averages = Object.entries(lessonStats).map(([lesson, stat]) => ({
-      lesson,
-      averageCorrect: Number((stat.totalCorrect / stat.count).toFixed(2))
-    }));
-  
-    return { data: averages };
-  };
-  
-  // Gelişim verisi (tarih + net)
-  exports.getProgressOverTime = async (studentId) => {
-    const { data, error } = await supabase.from("exams").select("*").eq("student_id", studentId).order("date", { ascending: true });
-    if (error) return { error };
-  
-    const progress = data.map((exam) => ({
-      date: exam.date,
-      net: Number((exam.correct - exam.wrong / 3).toFixed(2))
-    }));
-  
-    return { data: progress };
-  };
+};
+
+// Ders bazlı ortalama doğru sayısı
+exports.getAverageByLesson = async (studentId) => {
+  const { data, error } = await supabase
+    .from("exams")
+    .select("lesson, correct")
+    .eq("student_id", studentId);
+  if (error) return { error };
+
+  const stats = {};
+  data.forEach(({ lesson, correct }) => {
+    if (!stats[lesson]) stats[lesson] = { totalCorrect: 0, count: 0 };
+    stats[lesson].totalCorrect += correct;
+    stats[lesson].count += 1;
+  });
+
+  const dataOut = Object.entries(stats).map(([lesson, s]) => ({
+    lesson,
+    averageCorrect: Number((s.totalCorrect / s.count).toFixed(2)),
+  }));
+
+  return { data: dataOut, error: null };
+};
+
+// Zaman içinde gelişim (tarih + net)
+exports.getProgressOverTime = async (studentId) => {
+  const { data, error } = await supabase
+    .from("exams")
+    .select("date, correct, wrong, blank")
+    .eq("student_id", studentId)
+    .order("date", { ascending: true });
+  if (error) return { error };
+
+  const progress = data.map(({ date, correct, wrong, blank }) => {
+    const net = correct - wrong / 3;
+    return { date, net: Number(net.toFixed(2)) };
+  });
+  return { data: progress, error: null };
+};
+
+exports.getResultsByTeacherId = async (teacherId) => {
+  const { data, error } = await supabase
+    .from("exam_assignments")
+    .select(`
+      id,                                     -- assignment id
+      student_id,
+      exam_templates (
+        id,
+        teacher_id,
+        name,
+        date,
+        lessons (
+          id,
+          lesson,
+          question_count
+        )
+      ),
+      exam_results (                          -- sınav sonuçlarınızın bulunduğu tablo
+        id,
+        lesson,
+        correct,
+        wrong,
+        blank
+      )
+    `)
+    .eq("exam_templates.teacher_id", teacherId);
+
+  return { data, error };
+};

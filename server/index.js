@@ -23,6 +23,15 @@ app.use("/api/exams", examRoutes);
 const teacherRoutes = require("./routes/teachers");
 app.use("/api/teachers", teacherRoutes);
 
+const examTemplateRoutes = require("./routes/examTemplates");
+app.use("/api/exam-templates", examTemplateRoutes);
+
+const examAssignmentRoutes = require("./routes/examAssignments");
+app.use("/api/exam-assignments", examAssignmentRoutes);
+
+const examResultsRoutes = require("./routes/examResults");
+app.use("/api/exam-results", examResultsRoutes);
+
 
 
 const PORT = process.env.PORT || 3001;

@@ -111,3 +111,30 @@ export async function createGoal(goalData) {
     }
   }
   
+  export async function createExams(exams) {
+    try {
+      const res = await fetch("/api/exams", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(exams),
+      });
+      return await res.json();
+    } catch (err) {
+      console.error("Error creating exams:", err);
+      return null;
+    }
+  }
+  
+  // 🆕 Öğrenciye ait sınav sonuçlarını getir
+  export async function fetchExamsByStudentId(studentId) {
+    try {
+      const res = await fetch(`/api/exams/student/${studentId}`);
+      return await res.json();
+    } catch (err) {
+      console.error("Error fetching exams:", err);
+      return [];
+    }
+  }
+
+
+  

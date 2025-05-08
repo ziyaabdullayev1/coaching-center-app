@@ -12,7 +12,9 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import StudentList from "./pages/StudentList";
 import TaskPage from "./pages/TaskPage";
 import StudentTasksPage from "./pages/StudentTasksPage";
-import HomePage from "./pages/HomePage"; // ✅ Anasayfa
+import HomePage from "./pages/HomePage"; 
+import StudentExamResultsPage from "./pages/StudentExamResultsPage";
+import TeacherExamPage from "./pages/TeacherExamPage";
 
 function App() {
   return (
@@ -74,6 +76,23 @@ function App() {
         }
       />
       <Route path="/dashboard/student/tasks" element={<StudentTasksPage />} />
+      
+<Route
+  path="/dashboard/student/exams"
+  element={
+    <ProtectedRoute allowedRoles={["student"]}>
+      <StudentExamResultsPage />
+    </ProtectedRoute>
+  }
+/>  
+<Route
+  path="/dashboard/teacher/exams"
+  element={
+    <ProtectedRoute allowedRoles={["teacher"]}>
+      <TeacherExamPage />
+    </ProtectedRoute>
+  }
+/>
     </Routes>
   );
 }

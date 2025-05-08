@@ -11,5 +11,9 @@ router.get("/student/:student_id/average", examsController.getAverageByLesson);
 router.get("/student/:student_id/progress", examsController.getProgress);
 router.get("/student/:student_id", examsController.getExamsByStudent);
 
+router.get(
+    "/teacher/:teacher_id/results",
+    examsController.getResultsByTeacher
+  );
 
 module.exports = router;

@@ -1,6 +1,7 @@
 import { useAuth } from "../contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 
 export default function TeacherDashboard() {
   const { user } = useAuth();
@@ -52,6 +53,13 @@ export default function TeacherDashboard() {
       >
         🎯 Öğrenci Hedefleri ve Görevlerini Yönet
       </button>
+      
+      {/* Sınav Yönetimi Link’i */}
+     <Link to="/dashboard/teacher/exams">
+       <button style={{ ...styles.button, marginTop: "1rem", background: "#3b82f6" }}>
+         📋 Sınav Yönetimi
+       </button>
+     </Link>
     </div>
   );
 }

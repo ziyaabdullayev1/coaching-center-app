@@ -1,25 +1,23 @@
-// server/routes/examAssignments.js
 const express = require("express");
 const router  = express.Router();
-// Burada alias’ı değiştirip assignmentsController dedik:
-const assignmentsController = require("../controllers/examAssignmentsController");
+const ctrl    = require("../controllers/examAssignmentsController");
 
-// Assign a template to one or more students
-router.post(
-  "/",
-  assignmentsController.assignTemplate
-);
+// Assign a template to students
+router.post("/", ctrl.assignTemplate);
 
-// Fetch a specific student’s assignments
-router.get(
-  "/student/:student_id",
-  assignmentsController.getAssignmentsForStudent
-);
+// Fetch assignments for one student
+router.get("/student/:student_id", ctrl.getAssignmentsForStudent);
 
-// NEW: fetch *all* assignments + their results for this teacher
+// **results** must come *before* the more general "/teacher/:teacher_id"
 router.get(
   "/teacher/:teacher_id/results",
-  assignmentsController.getResultsByTeacher
+  ctrl.getResultsByTeacher
+);
+
+// keep your plain teacher-only lookup if you still need it
+router.get(
+  "/teacher/:teacher_id",
+  ctrl.getAssignmentsForTeacher
 );
 
 module.exports = router;

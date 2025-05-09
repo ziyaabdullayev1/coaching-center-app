@@ -4,47 +4,42 @@ import { useAuth } from "../contexts/AuthContext";
 
 export default function ReviewExamResults() {
   const { user } = useAuth();
-  const [results, setResults] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+  const [assignments, setAssignments] = useState([]);
+  const [loading, setLoading]     = useState(true);
+  const [error, setError]         = useState();
 
   useEffect(() => {
     if (!user?.id) return;
-
-    const fetchResults = async () => {
-      setLoading(true);
-      setError("");
-      try {
-        const res = await fetch(
-          `http://localhost:3001/api/exam-assignments/teacher/${user.id}/results`
-        );
-        if (!res.ok) {
-          throw new Error(`Sunucu hatası: ${res.status} ${res.statusText}`);
-        }
-        const data = await res.json();
-        setResults(data);
-      } catch (err) {
-        setError(err.message);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchResults();
+    fetch(
+      `http://localhost:3001/api/exam-assignments/teacher/${user.id}/results`
+    )
+      .then((res) => {
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        return res.json();
+      })
+      .then((data) => setAssignments(data))
+      .catch((e) => setError(e.message))
+      .finally(() => setLoading(false));
   }, [user]);
 
   if (loading) return <p>🔄 Yükleniyor…</p>;
-  if (error)    return <p style={{ color: "red" }}>Hata: {error}</p>;
-  if (results.length === 0)
+  if (error)   return <p style={{ color: "red" }}>Hata: {error}</p>;
+    // drop any entries missing a real template name
+    const validAssignments = assignments.filter(a =>
+      a.exam_templates?.name
+    );
+  
+    if (validAssignments.length === 0)
     return <p>📭 Henüz atanmış veya çözülmüş sınav yok.</p>;
 
   return (
     <div style={{ maxWidth: 800, margin: "2rem auto" }}>
       <h2>📑 Sınav Sonuçları</h2>
-      {results.map((a) => {
-        const tpl = a.exam_templates;
+      {validAssignments.map((a) => {
+        // guard missing exam_templates
+        const tpl     = a.exam_templates || {};
         const lessons = tpl.exam_template_lessons || [];
-        const resArr  = a.exam_results || [];
+        const results = a.exams || [];
 
         return (
           <div
@@ -57,7 +52,11 @@ export default function ReviewExamResults() {
             }}
           >
             <h3>
-              {tpl.name} — {new Date(tpl.date).toLocaleDateString()}
+              {tpl.name || "—"} (
+              {tpl.date
+                ? new Date(tpl.date).toLocaleDateString()
+                : "—"}
+              )
             </h3>
             <p>
               Öğrenci ID: <code>{a.student_id}</code>
@@ -75,24 +74,24 @@ export default function ReviewExamResults() {
               </thead>
               <tbody>
                 {lessons.map((l) => {
-                  // bul varsa bu lesson için girilmiş sonucu
-                  const found = resArr.find((r) => r.lesson === l.lesson);
+                  // find this lesson's result
+                  const r = results.find((e) => e.lesson === l.lesson);
                   return (
                     <tr key={l.id}>
                       <td>{l.lesson}</td>
                       <td style={{ textAlign: "center" }}>
                         {l.question_count}
                       </td>
-                      {found ? (
+                      {r ? (
                         <>
                           <td style={{ textAlign: "center" }}>
-                            {found.correct}
+                            {r.correct}
                           </td>
                           <td style={{ textAlign: "center" }}>
-                            {found.wrong}
+                            {r.wrong}
                           </td>
                           <td style={{ textAlign: "center" }}>
-                            {found.blank}
+                            {r.blank}
                           </td>
                         </>
                       ) : (

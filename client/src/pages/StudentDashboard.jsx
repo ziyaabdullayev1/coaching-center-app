@@ -60,6 +60,7 @@ export default function StudentDashboard() {
       return alert("Lütfen tüm alanları doldurun.");
     }
     const payload = {
+      assignment_id: assignment.id,
       student_id: studentInfo.id,
       date: assignment.exam_templates.date,
       lesson: lesson.lesson,

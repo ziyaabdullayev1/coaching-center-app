@@ -1,119 +1,88 @@
-// src/components/AddExamResult.jsx
-import { useState, useEffect } from "react";
-import { fetchTemplatesByTeacher } from "../services/examRequests";
-import { createExams } from "../services/requests";
+// src/components/ReviewExamResults.jsx
+import { useEffect, useState } from "react";
+import { useAuth } from "../contexts/AuthContext";
+import "./AddExamResult.css";
 
-export default function AddExamResult({ teacherId }) {
-  const [templates, setTemplates] = useState([]);
-  const [selTpl, setSelTpl] = useState(null);
-  const [rows, setRows] = useState([]);
-
-  useEffect(() => {
-    const load = async () => {
-      const tpls = await fetchTemplatesByTeacher(teacherId);
-      setTemplates(tpls);
-    };
-    load();
-  }, [teacherId]);
+export default function ReviewExamResults() {
+  const { user } = useAuth();
+  const [assignments, setAssignments] = useState([]);
+  const [loading, setLoading]   = useState(true);
+  const [error, setError]       = useState();
 
   useEffect(() => {
-    if (selTpl?.exam_template_lessons) {
-      setRows(
-        selTpl.exam_template_lessons.map((l) => ({
-          lesson: l.lesson,
-          correct: 0,
-          wrong: 0,
-          blank: 0,
-        }))
-      );
-    }
-  }, [selTpl]);
+    if (!user?.id) return;
+    fetch(`/api/exam-assignments/teacher/${user.id}/results`)
+      .then(res => {
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        return res.json();
+      })
+      .then(setAssignments)
+      .catch(e => setError(e.message))
+      .finally(() => setLoading(false));
+  }, [user]);
 
-  const handleRow = (i, field, value) => {
-    const arr = [...rows];
-    arr[i][field] = Number(value);
-    setRows(arr);
-  };
+  if (loading) return <p>🔄 Yükleniyor…</p>;
+  if (error)   return <p className="error">Hata: {error}</p>;
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!selTpl) {
-      alert("Önce bir şablon seçin.");
-      return;
-    }
-    const payload = rows.map((r) => ({
-      student_id: selTpl.student_id,  // şablonda student_id saklıysa, yoksa student seçimi ekle
-      date: selTpl.date,
-      lesson: r.lesson,
-      correct: r.correct,
-      wrong: r.wrong,
-      blank: r.blank,
-    }));
-    const saved = await createExams(payload);
-    if (saved) {
-      alert("Sonuçlar kaydedildi!");
-      setSelTpl(null);
-      setRows([]);
-    } else {
-      alert("Hata oluştu.");
-    }
-  };
+  const valid = assignments.filter(a => a.exam_templates?.name);
+  if (!valid.length)
+    return <p>📭 Henüz atanmış veya çözülmüş sınav yok.</p>;
 
   return (
-    <form onSubmit={handleSubmit} style={{ maxWidth: 600, margin: "2rem auto" }}>
-      <h3>✏️ Sınav Sonuç Girişi</h3>
+    <div className="results-container">
+      {valid.map(a => {
+        const tpl     = a.exam_templates;
+        const lessons = tpl.exam_template_lessons || [];
+        const results = a.exams || [];
 
-      {/* Eğer şablonlar henüz yoksa */}
-      {!templates.length && <p>📋 Hiç şablon bulunamadı.</p>}
+        return (
+          <div className="result-card" key={a.id}>
+            <div className="result-header">
+              <h3 className="exam-name">{tpl.name}</h3>
+              <time className="exam-date">
+                {tpl.date ? new Date(tpl.date).toLocaleDateString() : "—"}
+              </time>
+            </div>
+            <div className="student-id">
+              Öğrenci ID: <code>{a.student_id}</code>
+            </div>
+            <p className="scoring-info">
+              Puanlama kuralı: Her 4 yanlış, 1 doğruyu götürür.<br/>
+              Net doğru = Doğru – (Yanlış / 4)<br/>
+              Puan = (Net doğru / Soru Adet) × 100
+            </p>
 
-      <select
-        value={selTpl?.id || ""}
-        onChange={(e) =>
-          setSelTpl(templates.find((t) => t.id === e.target.value) || null)
-        }
-        style={{ width: "100%", marginBottom: "1rem" }}
-      >
-        <option value="">— Şablon Seç —</option>
-        {templates.map((t) => (
-          <option key={t.id} value={t.id}>
-            {t.name} ({new Date(t.date).toLocaleDateString()})
-          </option>
-        ))}
-      </select>
+            <div className="lesson-grid">
+              {lessons.map(l => {
+                const r = results.find(e => e.lesson === l.lesson) || {};
+                const correct = r.correct || 0;
+                const wrong   = r.wrong   || 0;
+                const blank   = r.blank   || 0;
 
-      {rows.map((r, i) => (
-        <div key={i} style={{ display: "flex", gap: 8, marginBottom: 4 }}>
-          <div style={{ flex: 2, lineHeight: "2.5rem" }}>{r.lesson}</div>
-          <input
-            type="number"
-            placeholder="Doğru"
-            value={r.correct}
-            min={0}
-            onChange={(e) => handleRow(i, "correct", e.target.value)}
-            style={{ flex: 1 }}
-          />
-          <input
-            type="number"
-            placeholder="Yanlış"
-            value={r.wrong}
-            min={0}
-            onChange={(e) => handleRow(i, "wrong", e.target.value)}
-            style={{ flex: 1 }}
-          />
-          <input
-            type="number"
-            placeholder="Boş"
-            value={r.blank}
-            min={0}
-            onChange={(e) => handleRow(i, "blank", e.target.value)}
-            style={{ flex: 1 }}
-          />
-        </div>
-      ))}
+                // net doğru ve puan hesaplama
+                const netCorrect = (correct - wrong / 4).toFixed(2);
+                const score = l.question_count
+                  ? ((netCorrect / l.question_count) * 100).toFixed(1)
+                  : "0.0";
 
-      <button type="submit" style={{ marginTop: "1rem" }}>
-        Sonuçları Kaydet
-      </button>
-    </form>
+                return (
+                  <div className="lesson-item" key={l.lesson}>
+                    <h4 className="lesson-title">{l.lesson}</h4>
+                    <div className="stats-row">
+                      <span>🟢 {correct}</span>
+                      <span>🔴 {wrong}</span>
+                      <span>⚪ {blank}</span>
+                    </div>
+                    <div className="net-score">Net: {netCorrect}</div>
+                    <div className="score-label">{score} puan</div>
+                    <progress max="100" value={score}></progress>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        );
+      })}
+    </div>
   );
 }

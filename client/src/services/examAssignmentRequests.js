@@ -1,3 +1,4 @@
+//client/src/services/examAssignmentRequests.js
 const API = "http://localhost:3001";
 
 export async function assignExamTemplate(payload) {
@@ -76,4 +77,33 @@ export async function submitExamResults({ assignment_id, lesson_results }) {
     return false;
   }
   return true;
+}
+
+export async function updateAssignmentFeedback(assignmentId, comment) {
+  const res = await fetch(
+    `${API}/api/exam-assignments/${assignmentId}/feedback`,  // ← now correct
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ comment }),
+    }
+  );
+  if (!res.ok) {
+    console.error("updateAssignmentFeedback failed:", await res.text());
+    return false;
+  }
+  return true;
+}
+
+export async function fetchAssignmentsForStudentByEmail(email) {
+  const url = `/api/exam-assignments/student?email=${encodeURIComponent(email)}`;
+  console.log("[examAssignmentRequests] fetching:", url);
+
+  const res = await fetch(url);
+  if (!res.ok) {
+    const text = await res.text();
+    console.error("fetchAssignmentsForStudentByEmail failed:", res.status, text);
+    return [];
+  }
+  return res.json();
 }

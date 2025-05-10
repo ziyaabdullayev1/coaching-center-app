@@ -1,0 +1,92 @@
+/* src/pages/StudentExamResultsPage.css */
+:root {
+  --bg-light: #f7fafc;
+  --card-bg: #ffffff;
+  --accent: #3b82f6;
+  --warning: #dc2626;
+  --text-dark: #1f2937;
+  --text-muted: #4b5563;
+}
+
+.results-page {
+  max-width: 800px;
+  margin: 2rem auto;
+  padding: 0 1rem;
+  background: var(--bg-light);
+  border-radius: 8px;
+}
+
+.page-title {
+  text-align: center;
+  margin-bottom: 1.5rem;
+  font-size: 1.8rem;
+  color: var(--text-dark);
+}
+
+.status-message {
+  text-align: center;
+  color: var(--text-muted);
+  margin-top: 2rem;
+}
+.status-message.error {
+  color: var(--warning);
+}
+
+.exam-card {
+  background: var(--card-bg);
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  padding: 1.2rem;
+  margin-bottom: 1rem;
+  border-left: 4px solid var(--accent);
+}
+
+.exam-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.8rem;
+}
+
+.exam-date {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+}
+
+.exam-lesson {
+  font-weight: 600;
+  color: var(--text-dark);
+}
+
+.exam-details {
+  display: flex;
+  gap: 1.5rem;
+  margin-bottom: 0.8rem;
+}
+
+.exam-detail {
+  font-size: 1rem;
+  color: var(--text-dark);
+}
+
+.exam-warning {
+  font-size: 0.95rem;
+  color: var(--warning);
+  margin-bottom: 0.8rem;
+}
+
+.exam-feedback {
+  background: #eff6ff;
+  border-left: 3px solid var(--accent);
+  padding: 0.8rem;
+  border-radius: 4px;
+}
+
+.feedback-title {
+  font-weight: 600;
+  color: var(--accent);
+}
+
+.feedback-text {
+  margin: 0.4rem 0 0;
+  color: var(--text-dark);
+}

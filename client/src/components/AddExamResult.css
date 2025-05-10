@@ -97,3 +97,46 @@ progress {
   border-radius: 4px;
 }
 
+.feedback-section {
+  margin-top: 1rem;
+  border-top: 1px solid #ddd;
+  padding-top: 1rem;
+}
+
+.feedback-label {
+  display: block;
+  margin-bottom: 0.3rem;
+  font-weight: bold;
+  color: #333;
+}
+
+.feedback-input {
+  width: 100%;
+  border: 1px solid #bbb;
+  border-radius: 4px;
+  padding: 0.5rem;
+  font-size: 0.9rem;
+  resize: vertical;
+}
+
+.feedback-error {
+  margin: 0.3rem 0;
+  color: #c00;
+  font-size: 0.85rem;
+}
+
+.feedback-btn {
+  margin-top: 0.4rem;
+  background: #007bff;
+  color: white;
+  border: none;
+  padding: 0.5rem 0.8rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+.feedback-btn:disabled {
+  background: #88b7ff;
+  cursor: not-allowed;
+}

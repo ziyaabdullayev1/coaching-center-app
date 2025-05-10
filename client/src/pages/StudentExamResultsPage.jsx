@@ -1,58 +1,78 @@
 // src/pages/StudentExamResultsPage.jsx
 import { useEffect, useState } from "react";
 import { useAuth } from "../contexts/AuthContext";
-import { fetchExamsByStudentId } from "../services/requests";
+import { fetchAssignmentsForStudentByEmail } from "../services/examAssignmentRequests";
+import "./StudentExamResultsPage.css";
 
 export default function StudentExamResultsPage() {
   const { user } = useAuth();
-  const [exams, setExams] = useState([]);
+  const [exams, setExams]     = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError]     = useState();
 
   useEffect(() => {
     const load = async () => {
-      if (!user?.email) return;
-      const studentId = user.user_metadata?.student_id || user.id;
-      const data = await fetchExamsByStudentId(studentId);
-      setExams(data);
-      setLoading(false);
+      if (!user?.email) {
+        setLoading(false);
+        return;
+      }
+      try {
+        const assignments = await fetchAssignmentsForStudentByEmail(user.email);
+        const examsList = assignments.flatMap(a => {
+          if (!Array.isArray(a.exams)) return [];
+          return a.exams.map(r => ({
+            id:            r.id,
+            assignment_id: r.assignment_id,
+            lesson:        r.lesson,
+            correct:       r.correct,
+            wrong:         r.wrong,
+            blank:         r.blank,
+            date:          a.exam_templates?.date,
+            feedback:      a.feedback || ""
+          }));
+        });
+        setExams(examsList);
+      } catch (e) {
+        setError(e.message || "Sunucu hatası");
+      } finally {
+        setLoading(false);
+      }
     };
     load();
   }, [user]);
 
-  if (loading) return <p>⏳ Yükleniyor...</p>;
-  if (!exams.length) return <p>Henüz sınav sonucu yok.</p>;
+  if (loading) return <p className="status-message">⏳ Yükleniyor...</p>;
+  if (error)   return <p className="status-message error">Hata: {error}</p>;
+  if (!exams.length) return <p className="status-message">Henüz sınav sonucu yok.</p>;
 
   return (
-    <div style={{ maxWidth: 700, margin: "2rem auto", padding: "0 1rem" }}>
-      <h2>📊 Sınav Sonuçlarım & Öneriler</h2>
-      {exams.map((ex) => {
-        const total = ex.correct + ex.wrong + ex.blank;
-        const ratio = total > 0 ? ex.correct / total : 0;
-        const pct = (ratio * 100).toFixed(1);
+    <div className="results-page">
+      <h2 className="page-title">📊 Sınav Sonuçlarım & Öneriler</h2>
+      {exams.map(ex => {
+        const total     = ex.correct + ex.wrong + ex.blank;
+        const ratio     = total > 0 ? ex.correct / total : 0;
+        const pct       = (ratio * 100).toFixed(1);
         const needsWork = ratio < 0.7;
         return (
-          <div
-            key={`${ex.id}-${ex.lesson}`}
-            style={{
-              borderRadius: 8,
-              padding: "1rem",
-              marginBottom: "1rem",
-              background: needsWork ? "#fee2e2" : "#e6fffa",
-            }}
-          >
-            <p>
-              <b>Tarih:</b> {new Date(ex.date).toLocaleDateString()}
-            </p>
-            <p>
-              <b>Ders:</b> {ex.lesson}
-            </p>
-            <p>
-              <b>Doğru:</b> {ex.correct} / {total} ({pct}%)
-            </p>
-            {needsWork && (
-              <p style={{ color: "#c53030" }}>
-                ❗ %70’in altında kalmışsın, tekrar çalış!
-              </p>
+          <div className="exam-card" key={`${ex.assignment_id}-${ex.lesson}`}>
+            <div className="exam-header">
+              <span className="exam-date">{ex.date ? new Date(ex.date).toLocaleDateString() : "—"}</span>
+              <span className="exam-lesson">{ex.lesson}</span>
+            </div>
+            <div className="exam-details">
+              <div className="exam-detail">
+                <strong>Doğru:</strong> {ex.correct} / {total}
+              </div>
+              <div className="exam-detail">
+                <strong>Başarı:</strong> {pct}%
+              </div>
+            </div>
+            {needsWork && <div className="exam-warning">❗ %70’in altında kalmışsın, tekrar çalış!</div>}
+            {ex.feedback && (
+              <div className="exam-feedback">
+                <span className="feedback-title">📝 Öğretmen Yorumu:</span>
+                <p className="feedback-text">{ex.feedback}</p>
+              </div>
             )}
           </div>
         );

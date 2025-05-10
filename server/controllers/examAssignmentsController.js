@@ -68,7 +68,6 @@ exports.getAssignmentsForStudent = async (req, res) => {
 
 // GET    /api/exam-assignments/teacher/:teacher_id/results
 exports.getResultsByTeacher = async (req, res) => {
-  console.log("🔥 GET /api/exam-assignments/teacher/%s/results", req.params.teacher_id);
   const teacherId = req.params.teacher_id;
   const { data, error } = await assignmentService.getResultsByTeacherId(teacherId);
   if (error) {
@@ -100,5 +99,63 @@ exports.getAssignmentsForTeacher = async (req, res) => {
   );
   if (error) return res.status(500).json({ error: error.message });
   console.log("👉 [getAssignmentsForTeacher] for", teacherId, data);
+  res.json(data);
+};
+
+
+exports.addAssignmentFeedback = async (req, res) => {
+  const assignmentId = req.params.id;
+  const { comment }   = req.body;
+
+  if (!comment?.trim()) {
+    return res.status(400).json({ error: "Yorum boş olamaz." });
+  }
+
+  const { error } = await assignmentService.updateAssignmentFeedback(
+    assignmentId,
+    comment
+  );
+  if (error) {
+    console.error("Feedback güncelleme hatası:", error);
+    return res.status(500).json({ error: error.message });
+  }
+  res.status(200).json({ success: true });
+};
+
+
+exports.getAssignmentsForStudentByEmail = async (req, res) => {
+  const email = req.query.email;
+  if (!email) {
+    return res.status(400).json({ error: "email query param is required" });
+  }
+  console.log("→ [Controller] lookup student by email:", email);
+
+  // 1) Find the student.id for that email
+  const { data: student, error: studErr } = await supabase
+    .from("students")
+    .select("id")
+    .eq("email", email)
+    .maybeSingle();
+  if (studErr) {
+    console.error("→ [Controller] student lookup error:", studErr);
+    return res.status(500).json({ error: studErr.message });
+  }
+  if (!student) {
+    console.warn("→ [Controller] no students row for email:", email);
+    return res.status(404).json({ error: "No student record found" });
+  }
+
+  console.log("→ [Controller] mapped to student_id:", student.id);
+
+  // 2) Fetch assignments exactly as before
+  const { data, error } = await assignmentService.getAssignmentsForStudent(
+    student.id
+  );
+  if (error) {
+    console.error("→ [Controller] getAssignmentsForStudent error:", error);
+    return res.status(500).json({ error: error.message });
+  }
+
+  console.log("→ [Controller] returning assignments:", data);
   res.json(data);
 };

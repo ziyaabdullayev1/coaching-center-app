@@ -15,6 +15,7 @@ import StudentTasksPage from "./pages/StudentTasksPage";
 import HomePage from "./pages/HomePage"; 
 import StudentExamResultsPage from "./pages/StudentExamResultsPage";
 import TeacherExamPage from "./pages/TeacherExamPage";
+import StudentExamAnalysisPage from "./pages/StudentExamAnalysisPage";
 
 function App() {
   return (
@@ -93,6 +94,10 @@ function App() {
     </ProtectedRoute>
   }
 />
+ <Route
+          path="/dashboard/student/analysis"
+          element={<StudentExamAnalysisPage />}
+        />
     </Routes>
   );
 }

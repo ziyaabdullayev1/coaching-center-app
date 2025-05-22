@@ -56,36 +56,42 @@ exports.getAssignmentsForStudent = async (studentId) => {
 
 // Pull every assignment for a teacher and join in any exam results
 exports.getResultsByTeacherId = async (teacherId) => {
-  // note: no inline comments in the select string!
+  const selectStr = `
+    id,
+    student_id,
+    student:students(id,name),
+    assigned_at,
+    feedback,
+    exam_templates(
+      id,
+      teacher_id,
+      name,
+      date,
+      exam_template_lessons(
+        id,
+        lesson,
+        question_count
+      )
+    ),
+    exams(
+      id,
+      assignment_id,
+      lesson,
+      correct,
+      wrong,
+      blank
+    )
+  `;
+
   const { data, error } = await supabase
     .from("exam_assignments")
-    .select(`
-      id,
-      student_id,
-      assigned_at,
-      exam_templates (
-        id,
-        teacher_id,
-        name,
-        date,
-        exam_template_lessons (
-          id,
-          lesson,
-          question_count
-        )
-      ),
-      exams (
-        id,
-        assignment_id,
-        lesson,
-        correct,
-        wrong,
-        blank
-      )
-    `)
+    .select(selectStr)
     .eq("exam_templates.teacher_id", teacherId);
 
-  if (error) return { error };
+  if (error) {
+    console.error("💥 getResultsByTeacherId error:", error);
+    return { error };
+  }
   return { data };
 };
 

@@ -40,6 +40,7 @@ export default function ReviewExamResults() {
         const tpl     = a.exam_templates || {};
         const lessons = tpl.exam_template_lessons || [];
         const results = a.exams || [];
+         const studentName = a.student?.name || a.student_id;
 
         return (
           <div
@@ -59,7 +60,7 @@ export default function ReviewExamResults() {
               )
             </h3>
             <p>
-              Öğrenci ID: <code>{a.student_id}</code>
+              Öğrenci Isim: <strong>{studentName}</strong>
             </p>
 
             <table style={{ width: "100%", borderCollapse: "collapse" }}>

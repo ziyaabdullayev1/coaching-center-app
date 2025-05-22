@@ -129,6 +129,9 @@ export default function StudentDashboard() {
         <Link to="/dashboard/student/exams">
           <button style={styles.btn}>📊 Sınav Sonuçlarım</button>
         </Link>
+        <Link to="/dashboard/student/analysis">
+          <button style={styles.btn}>📈 Sınav Analizim</button>
+          </Link>
       </div>
 
       {/* Atanan Sınavlar & Çözüm */}

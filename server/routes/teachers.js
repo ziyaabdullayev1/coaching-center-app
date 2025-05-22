@@ -17,4 +17,7 @@ router.delete("/:id", teachersController.deleteTeacher);
 // Email'e göre öğretmen getir (Dashboard için)
 router.get("/email/:email", teachersController.getTeacherByEmail);
 
+// Öğretmene bağlı öğrencileri getir
+router.get("/:id/students", teachersController.getTeacherStudents);
+
 module.exports = router;

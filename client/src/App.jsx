@@ -16,6 +16,7 @@ import HomePage from "./pages/HomePage";
 import StudentExamResultsPage from "./pages/StudentExamResultsPage";
 import TeacherExamPage from "./pages/TeacherExamPage";
 import StudentExamAnalysisPage from "./pages/StudentExamAnalysisPage";
+import TeacherExamAnalysisPage from "./pages/TeacherExamAnalysisPage";
 
 function App() {
   return (
@@ -91,6 +92,14 @@ function App() {
   element={
     <ProtectedRoute allowedRoles={["teacher"]}>
       <TeacherExamPage />
+    </ProtectedRoute>
+  }
+/>
+<Route
+  path="/dashboard/teacher/exam-analysis"
+  element={
+    <ProtectedRoute allowedRoles={["teacher"]}>
+      <TeacherExamAnalysisPage />
     </ProtectedRoute>
   }
 />

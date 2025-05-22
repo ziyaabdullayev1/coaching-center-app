@@ -1,3 +1,4 @@
+// src/components/AddExamResult.jsx
 import { useEffect, useState } from "react";
 import { useAuth } from "../contexts/AuthContext";
 import { updateAssignmentFeedback } from "../services/examAssignmentRequests";
@@ -59,6 +60,8 @@ export default function AddExamResult() {
         const lessons = tpl.exam_template_lessons || [];
         const results = a.exams || [];
         const fid     = a.id;
+        // display student name if available
+        const studentName = a.student?.name || a.student_id;
 
         return (
           <div className="result-card" key={fid}>
@@ -69,8 +72,9 @@ export default function AddExamResult() {
                 {tpl.date ? new Date(tpl.date).toLocaleDateString() : "—"}
               </time>
             </div>
-            <div className="student-id">
-              Öğrenci ID: <code>{a.student_id}</code>
+            {/* Student Name */}
+            <div className="student-name">
+              Öğrenci: <strong>{studentName}</strong>
             </div>
 
             {/* Scoring info */}

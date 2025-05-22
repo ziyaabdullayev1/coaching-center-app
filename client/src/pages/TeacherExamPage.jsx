@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useAuth } from "../contexts/AuthContext";
+import { useNavigate } from "react-router-dom";
 import AddExamDefinition from "../components/AddExamDefinition";
 import AssignExamForm from "../components/AssignExamForm";
 import AddExamResult from "../components/AddExamResult";
@@ -9,14 +10,24 @@ import ReviewExamResults from "../components/ReviewExamResults";
 
 export default function TeacherExamPage() {
   const { user } = useAuth();
-  const [activeTab, setActiveTab] = useState("define"); // "define" | "assign" | "result" | "review"
+  const navigate = useNavigate();
+  const [activeTab, setActiveTab] = useState("define"); // "define" | "assign" | "result" | "review" | "analysis"
 
   const tabs = [
     { key: "define", label: "📝 Şablon Oluştur" },
     { key: "assign", label: "👥 Öğrencilere Ata" },
     { key: "result", label: "✏️ Sonuç Girişi" },
     { key: "review", label: "🧐 Sonuçları İncele" },
+    { key: "analysis", label: "📊 Analiz" },
   ];
+
+  const handleTabChange = (tab) => {
+    if (tab === "analysis") {
+      navigate("/dashboard/teacher/exam-analysis");
+    } else {
+      setActiveTab(tab);
+    }
+  };
 
   return (
     <div style={{ maxWidth: 800, margin: "2rem auto", padding: "0 1rem" }}>
@@ -36,7 +47,7 @@ export default function TeacherExamPage() {
         {tabs.map((tab) => (
           <button
             key={tab.key}
-            onClick={() => setActiveTab(tab.key)}
+            onClick={() => handleTabChange(tab.key)}
             style={{
               padding: "0.6rem 1.2rem",
               cursor: "pointer",

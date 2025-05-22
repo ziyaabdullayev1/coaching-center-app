@@ -2,6 +2,8 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "../contexts/AuthContext";
 import { updateAssignmentFeedback } from "../services/examAssignmentRequests";
+import { saveTopicMistakes } from "../services/topicMistakesRequests";
+import TopicMistakesTracker from "./TopicMistakesTracker";
 import "./AddExamResult.css";
 
 export default function AddExamResult() {
@@ -12,6 +14,7 @@ export default function AddExamResult() {
   const [feedbackText, setFeedbackText] = useState({});
   const [submitting, setSubmitting]     = useState({});
   const [submitError, setSubmitError]   = useState({});
+  const [showTopicMistakes, setShowTopicMistakes] = useState({});
 
   useEffect(() => {
     if (!user?.id) return;
@@ -43,6 +46,33 @@ export default function AddExamResult() {
       setSubmitError(prev => ({ ...prev, [id]: e.message }));
     } finally {
       setSubmitting(prev => ({ ...prev, [id]: false }));
+    }
+  };
+  
+  const toggleTopicMistakes = (assignmentId, lessonId) => {
+    const key = `${assignmentId}-${lessonId}`;
+    setShowTopicMistakes(prev => ({
+      ...prev,
+      [key]: !prev[key]
+    }));
+  };
+  
+  const handleSaveTopicMistakes = async (data) => {
+    try {
+      const result = await saveTopicMistakes(data);
+      alert('Konu bazlı hatalar başarıyla kaydedildi');
+      
+      // Close the topic mistakes tracker
+      const key = `${data.examId}-${data.lesson}`;
+      setShowTopicMistakes(prev => ({
+        ...prev,
+        [key]: false
+      }));
+      
+      return result;
+    } catch (error) {
+      console.error('Error saving topic mistakes:', error);
+      alert(`Hata: ${error.message}`);
     }
   };
 
@@ -95,6 +125,10 @@ export default function AddExamResult() {
                 const score = l.question_count
                   ? ((netCorrect / l.question_count) * 100).toFixed(1)
                   : "0.0";
+                  
+                const hasMistakes = wrong > 0 || blank > 0;
+                const trackerId = `${fid}-${l.lesson}`;
+                const showTracker = showTopicMistakes[trackerId] || false;
 
                 return (
                   <div className="lesson-item" key={l.lesson}>
@@ -107,6 +141,25 @@ export default function AddExamResult() {
                     <div className="net-score">Net: {netCorrect}</div>
                     <div className="score-label">{score} puan</div>
                     <progress max="100" value={score}></progress>
+                    
+                    {hasMistakes && (
+                      <button 
+                        className="topic-mistakes-btn"
+                        onClick={() => toggleTopicMistakes(fid, l.lesson)}
+                      >
+                        {showTracker ? "Konu Bazlı Hataları Gizle" : "Konu Bazlı Hataları Göster"}
+                      </button>
+                    )}
+                    
+                    {showTracker && hasMistakes && (
+                      <TopicMistakesTracker
+                        examId={r.id}
+                        lesson={l.lesson}
+                        totalWrong={wrong}
+                        totalBlank={blank}
+                        onSave={handleSaveTopicMistakes}
+                      />
+                    )}
                   </div>
                 );
               })}

@@ -59,9 +59,10 @@
 }
 
 .lesson-item {
-  background: #f9f9f9;
-  border-radius: 6px;
-  padding: 0.8rem;
+  background-color: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  padding: 1rem;
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
@@ -86,9 +87,8 @@
 }
 
 .score-label {
-  text-align: center;
-  font-size: 0.9rem;
-  color: #222;
+  font-weight: 500;
+  margin: 0.5rem 0 0.25rem;
 }
 
 progress {
@@ -139,4 +139,20 @@ progress {
 .feedback-btn:disabled {
   background: #88b7ff;
   cursor: not-allowed;
+}
+
+.topic-mistakes-btn {
+  margin-top: 10px;
+  background-color: #e0f2fe;
+  color: #0369a1;
+  border: 1px solid #0ea5e9;
+  border-radius: 4px;
+  padding: 6px 10px;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.topic-mistakes-btn:hover {
+  background-color: #bae6fd;
 }

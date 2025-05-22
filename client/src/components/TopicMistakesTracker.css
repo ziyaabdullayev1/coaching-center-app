@@ -1,0 +1,184 @@
+.topic-mistakes-tracker {
+  background-color: #fff;
+  border-radius: 8px;
+  padding: 16px;
+  margin-top: 16px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+.topic-mistakes-tracker h4 {
+  margin-top: 0;
+  color: #1e3a8a;
+  font-size: 18px;
+  margin-bottom: 12px;
+}
+
+.mistake-summary {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+  font-size: 14px;
+}
+
+.mistake-stat {
+  background-color: #f3f4f6;
+  padding: 6px 12px;
+  border-radius: 16px;
+}
+
+.mistake-stat.total {
+  background-color: #dbeafe;
+  font-weight: bold;
+}
+
+.progress-bar-container {
+  margin-bottom: 16px;
+}
+
+.progress-label {
+  font-size: 14px;
+  margin-bottom: 6px;
+  color: #4b5563;
+}
+
+.progress-bar {
+  height: 10px;
+  background-color: #f3f4f6;
+  border-radius: 5px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background-color: #3b82f6;
+  transition: width 0.3s ease;
+}
+
+.error-message {
+  color: #dc2626;
+  font-size: 14px;
+  margin: 8px 0;
+  padding: 8px;
+  background-color: #fee2e2;
+  border-radius: 4px;
+}
+
+.topics-container {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 16px;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.topic-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  background-color: #f9fafb;
+  border-radius: 4px;
+  border-left: 3px solid #3b82f6;
+}
+
+.topic-name {
+  font-weight: 500;
+}
+
+.topic-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.topic-count-input {
+  width: 60px;
+  padding: 4px 8px;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  text-align: center;
+}
+
+.remove-topic-btn {
+  background-color: #ef4444;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  width: 24px;
+  height: 24px;
+  line-height: 1;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.add-topic-btn {
+  background-color: #f3f4f6;
+  border: 1px dashed #9ca3af;
+  color: #4b5563;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  width: 100%;
+  text-align: center;
+  margin-bottom: 16px;
+}
+
+.add-topic-form {
+  margin-bottom: 16px;
+}
+
+.topic-input {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  margin-bottom: 8px;
+}
+
+.add-topic-buttons {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.cancel-btn {
+  padding: 6px 12px;
+  border: 1px solid #d1d5db;
+  background-color: white;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.add-btn {
+  padding: 6px 12px;
+  border: none;
+  background-color: #3b82f6;
+  color: white;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.save-btn {
+  width: 100%;
+  padding: 10px;
+  background-color: #10b981;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.save-btn:disabled {
+  background-color: #d1fae5;
+  cursor: not-allowed;
+}
+
+.no-mistakes-message {
+  text-align: center;
+  padding: 16px;
+  color: #6b7280;
+  font-style: italic;
+} 

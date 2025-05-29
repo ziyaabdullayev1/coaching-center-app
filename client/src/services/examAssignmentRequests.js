@@ -96,7 +96,7 @@ export async function updateAssignmentFeedback(assignmentId, comment) {
 }
 
 export async function fetchAssignmentsForStudentByEmail(email) {
-  const url = `/api/exam-assignments/student?email=${encodeURIComponent(email)}`;
+  const url = `http://localhost:3001/api/exam-assignments/student?email=${encodeURIComponent(email)}`;
   console.log("[examAssignmentRequests] fetching:", url);
 
   const res = await fetch(url);

@@ -61,93 +61,45 @@ exports.getTeacherStudents = async (req, res) => {
   console.log(`🔍 Fetching students for teacher ID: ${id}`);
   
   try {
-    // First, let's try to get students from a relationship table
-    // This assumes there might be a teacher_student or student_teacher junction table
-    let { data: relationData, error: relationError } = await supabase
-      .from("teacher_student")
-      .select("student_id")
-      .eq("teacher_id", id);
-      
-    if (relationError && relationError.code === '42P01') {
-      // Table doesn't exist, try another name
-      console.log("Trying student_teacher table instead...");
-      relationData = null;
-      relationError = null;
-      
-      const result = await supabase
-        .from("student_teacher")
-        .select("student_id")
-        .eq("teacher_id", id);
-        
-      relationData = result.data;
-      relationError = result.error;
+    // Get all unique students who have been assigned exams by this teacher
+    const { data, error } = await supabase
+      .from('exam_assignments')
+      .select(`
+        student_id,
+        students (
+          id,
+          name,
+          email,
+          grade
+        ),
+        exam_templates!inner (
+          id,
+          teacher_id
+        )
+      `)
+      .eq('exam_templates.teacher_id', id);
+
+    if (error) {
+      console.error("❌ Error fetching teacher's students:", error);
+      return res.status(500).json({ error: error.message });
     }
-    
-    if (relationError) {
-      console.error("❌ Error fetching teacher-student relations:", relationError);
-      
-      // If no relationship table, let's try direct lookup in students table
-      // Try different possible column names
-      console.log("Trying direct lookup in students table...");
-      
-      const possibleColumns = ["teacher_id", "teacher", "coach_id", "coach"];
-      let studentsData = null;
-      let studentsError = null;
-      
-      for (const column of possibleColumns) {
-        console.log(`Trying column: ${column}`);
-        const result = await supabase
-          .from("students")
-          .select("id, name, email, grade")
-          .eq(column, id);
-          
-        if (!result.error) {
-          studentsData = result.data;
-          break;
-        } else {
-          studentsError = result.error;
-        }
-      }
-      
-      if (studentsData) {
-        console.log(`✅ Found ${studentsData.length} students for teacher ID: ${id}`);
-        return res.json(studentsData);
-      } else {
-        // As a last resort, return all students
-        console.log("No direct relation found. Returning all students");
-        const { data: allStudents, error: allStudentsError } = await supabase
-          .from("students")
-          .select("id, name, email, grade");
-          
-        if (allStudentsError) {
-          console.error("❌ Error fetching all students:", allStudentsError);
-          return res.status(500).json({ error: allStudentsError.message });
-        }
-        
-        return res.json(allStudents || []);
-      }
-    } else if (relationData && relationData.length > 0) {
-      // Get the student IDs from the relation table
-      const studentIds = relationData.map(rel => rel.student_id);
-      
-      // Then fetch the actual student data
-      const { data: studentsData, error: studentsError } = await supabase
-        .from("students")
-        .select("id, name, email, grade")
-        .in("id", studentIds);
-        
-      if (studentsError) {
-        console.error("❌ Error fetching students by IDs:", studentsError);
-        return res.status(500).json({ error: studentsError.message });
-      }
-      
-      console.log(`✅ Found ${studentsData.length} students for teacher ID: ${id}`);
-      return res.json(studentsData || []);
-    } else {
-      // No relations found
+
+    if (!data || data.length === 0) {
       console.log(`✅ No students found for teacher ID: ${id}`);
       return res.json([]);
     }
+
+    // Transform the data to get unique students
+    const uniqueStudents = Array.from(
+      new Map(
+        data
+          .filter(item => item.students) // Filter out any null students
+          .map(item => [item.students.id, item.students]) // Use student ID as key
+      ).values()
+    );
+
+    console.log(`✅ Found ${uniqueStudents.length} students for teacher ID: ${id}`);
+    return res.json(uniqueStudents);
     
   } catch (err) {
     console.error("❌ Server error:", err);

@@ -35,8 +35,8 @@ export default function TeacherExamAnalysisPage() {
       if (!user?.id) return;
       
       try {
-        // Use relative path which will be proxied to the backend
-        const response = await fetch(`/api/teachers/${user.id}/students`);
+        // Use full URL path to the backend
+        const response = await fetch(`http://localhost:3001/api/teachers/${user.id}/students`);
         
         if (!response.ok) {
           const errorData = await response.json().catch(() => null);
@@ -125,7 +125,8 @@ export default function TeacherExamAnalysisPage() {
       return a.exams.map(r => ({
         date,
         lesson: r.lesson,
-        percentage: +((r.correct / (r.correct + r.wrong + r.blank)) * 100).toFixed(1)
+        percentage: +((r.correct / (r.correct + r.wrong + r.blank)) * 100).toFixed(1),
+        id: `${r.lesson}-${date}`
       }));
     });
 
@@ -178,27 +179,55 @@ export default function TeacherExamAnalysisPage() {
                 angle={-45}
                 textAnchor="end"
                 height={70}
-                interval={0}
-                tick={{ fontSize: 12 }}
+                ticks={[...new Set(lessonChartData.map(d => new Date(d.date).getTime()))].sort()}
+                interval="preserveStartEnd"
+                tick={({ x, y, payload }) => (
+                  <g transform={`translate(${x},${y})`}>
+                    <text
+                      x={0}
+                      y={0}
+                      dy={16}
+                      textAnchor="end"
+                      fill="#666"
+                      transform="rotate(-45)"
+                      style={{ fontSize: '12px' }}
+                    >
+                      {format(new Date(payload.value), 'dd/MM')}
+                    </text>
+                  </g>
+                )}
               />
               <YAxis domain={[0, 100]} />
-              <Tooltip formatter={value => `${value}%`} />
+              <Tooltip 
+                formatter={value => `${value}%`}
+                labelFormatter={ts => format(new Date(ts), 'dd/MM/yyyy')}
+              />
               <Legend verticalAlign="top" layout="horizontal" wrapperStyle={{ fontSize: 12, marginBottom: 10 }} />
 
-              {lessons.map((lesson, idx) => (
-                <Line
-                  key={lesson}
-                  type="monotone"
-                  dataKey="percentage"
-                  name={lesson}
-                  data={lessonChartData
-                    .filter(d => d.lesson === lesson)
-                    .map(d => ({ ...d, dateTs: new Date(d.date).getTime() }))}
-                  stroke={`hsl(${idx * 60}, 70%, 45%)`}
-                  dot={false}
-                  isAnimationActive={false}
-                />
-              ))}
+              {lessons.map((lesson, idx) => {
+                const lessonData = lessonChartData
+                  .filter(d => d.lesson === lesson)
+                  .map(d => ({
+                    ...d,
+                    dateTs: new Date(d.date).getTime(),
+                    key: d.id
+                  }))
+                  .sort((a, b) => a.dateTs - b.dateTs);
+                
+                return (
+                  <Line
+                    key={`line-${lesson}`}
+                    type="monotone"
+                    dataKey="percentage"
+                    name={lesson}
+                    data={lessonData}
+                    stroke={`hsl(${idx * 60}, 70%, 45%)`}
+                    dot={false}
+                    isAnimationActive={false}
+                    connectNulls
+                  />
+                );
+              })}
             </LineChart>
           </ResponsiveContainer>
         </section>

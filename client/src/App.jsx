@@ -17,6 +17,7 @@ import StudentExamResultsPage from "./pages/StudentExamResultsPage";
 import TeacherExamPage from "./pages/TeacherExamPage";
 import StudentExamAnalysisPage from "./pages/StudentExamAnalysisPage";
 import TeacherExamAnalysisPage from "./pages/TeacherExamAnalysisPage";
+import StudentTopicMistakesPage from "./pages/StudentTopicMistakesPage";
 
 function App() {
   return (
@@ -103,10 +104,18 @@ function App() {
     </ProtectedRoute>
   }
 />
- <Route
-          path="/dashboard/student/analysis"
-          element={<StudentExamAnalysisPage />}
-        />
+<Route
+  path="/dashboard/student/analysis"
+  element={<StudentExamAnalysisPage />}
+/>
+<Route
+  path="/dashboard/student/topic-mistakes"
+  element={
+    <ProtectedRoute allowedRoles={["student"]}>
+      <StudentTopicMistakesPage />
+    </ProtectedRoute>
+  }
+/>
     </Routes>
   );
 }

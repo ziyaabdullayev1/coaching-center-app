@@ -107,3 +107,21 @@ export async function fetchAssignmentsForStudentByEmail(email) {
   }
   return res.json();
 }
+
+export async function fetchTopicMistakesForExam(examId) {
+  const url = `${API}/api/exam-topic-mistakes/${examId}`;
+  console.log("[examAssignmentRequests] fetching topic mistakes:", url);
+
+  try {
+    const res = await fetch(url);
+    if (!res.ok) {
+      const text = await res.text();
+      console.error("fetchTopicMistakesForExam failed:", res.status, text);
+      return [];
+    }
+    return res.json();
+  } catch (error) {
+    console.error("fetchTopicMistakesForExam error:", error);
+    return [];
+  }
+}
